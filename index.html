@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="en">
-
   <head>
     <meta charset="utf-8">
 
@@ -42,7 +41,7 @@
           <section>
           <h2>Who?</h2>
           <ul>
-            <li>work at GeometryFactory
+            <li>works at GeometryFactory
             </li>
             <li>improved interfaces/concepts for surface meshes and polyhedra
             </li>
@@ -53,9 +52,7 @@
           </ul>
           </section>
           <section>
-	  <pre><code class="cpp">
-using std::disclaimer;
-	  </code></pre>
+	  <pre><code class="cpp">using std::disclaimer;</code></pre>
           </section>
         </section>
         
@@ -63,11 +60,11 @@ using std::disclaimer;
           <section>
             <h2>Generic Programming</h2>
             <ul>
-              <li>created Alexander Stepanov and David Musser</li>
-              <li>reuse through commonalities in algorithm requirements</li>
+              <li>created by Alexander Stepanov and David Musser</li>
               <li>abstraction without penalty</li>
               <li>value semantics</li>
-              <li>use common syntax to reuse</li>
+              <li>reuse through commonalities in algorithm requirements</li>
+              <li>reuse through common syntax</li>
             </ul>
           </section>
           
@@ -77,11 +74,11 @@ using std::disclaimer;
               Continuously raise the level of abstraction over input parameters.
             </p>
             
-            <p>
+            <p class="fragment">
               Group those abstractions into Concepts.
             </p>
             
-            <p>
+            <p class="fragment">
               Use concept refinement and hierarchies of concepts to expose implementation differences.
             </p>
           </section>
@@ -129,16 +126,28 @@ using std::disclaimer;
 
         <section>
           <section>
-            <h2>Generic Programming with C++</h2>
+            <h3>Generic Programming with C++</h3>
             <ul>
-              <li>no direct language level support</li>
-              <li>library level support is in sight</li>
-              <li>boilerplate (iterator_traits, allocator_traits, pointer_traits, function_traits&hellip;)</li>
-              <li>complicated hackery to get simple features</li>
-              <li>compiler barf</li>
+              <li>no explicit language level support</li>
+              <li>templates and meta-programming provide the implementation mechanism</li>
             </ul>
           </section>
 
+          <section>
+            <ul>
+              <li>boilerplate (iterator_traits, allocator_traits, pointer_traits, function_traits&hellip;)</li>
+              <li>complicated hackery to get simple features</li>              
+              <li>library level support is in sight</li>
+            </ul>
+          </section>
+
+          <section data-state="alert">
+            <h3>Dreaded Compiler barf</h3>
+            <img src="barf.png"/>
+          </section>
+        </section>
+
+        <section>
           <section>
             <h2>Methods</h2>
             <ul>
@@ -150,8 +159,7 @@ using std::disclaimer;
 
           <section>
             <h2>Straight Forward</h2>
-            <pre><code class="cpp">
-concept Stack&lt;typename X&gt; {
+            <pre><code class="cpp">concept Stack&lt;typename X&gt; {
   typename value_type;
 
   void Stack::push(value_type);
@@ -215,26 +223,28 @@ concept Stack&lt;typename X&gt; {
           <section>
 <h2>Free Functions</h2>
 <pre><code class="cpp">concept SinglePassRange&lt;typename X&gt; {
-  typename iterator; // no traits needed
-  typename const_iterator;
+  typedef iterator_type<X>::type iterator;
   where SinglePassIterator&lt;iterator&gt;;
-  where SinglePassIterator&lt;const_iterator&gt;;
 
   iterator begin(X&); // notice free functions
   iterator end(X&);
-  const_iterator begin(const X&);
-  const_iterator end(const X&);
 };
-
-namespace mine {
+</code></pre>
+          </section>
+<section>
+<pre><code class="cpp">namespace mine {
   struct my_vector { 
-    typedef int* iterator; 
-    typedef const int* const_iterator; 
     int x[20]; 
   };
 
   int* begin(my_vector& x) { return x; }
   int* begin(my_vector& x) { return x + 20; }
+
+  template<>
+  struct iterator_type<my_vector> { 
+    typedef int* type;
+  };
+  
 }
 </code></pre>
           </section>
@@ -242,12 +252,12 @@ namespace mine {
             <h2>Free functions</h2>
             <ul>
               <li>pinnacle of versatility</li>
-              <li>retroactive modelin</li>
+              <li>retroactive modeling</li>
               <li>ADL is a pain to handle in generic code</li>
               <li>requires advanced language features</li>
             </ul>
           </section>
-        </section>
+          </section>
 
         <section>
           <section>
@@ -306,6 +316,7 @@ namespace mine {
             <h3>Different Solutions: Boost.Geometry</h3>
             <ul>
               <li>minimalist kernels provide type introspection</li>
+              <li>tags to dispatch to implementations</li>
               <li>type adaption through meta-functions</li>
               <li>strategies encapsulate different implementations</li>
             </ul>
@@ -354,7 +365,7 @@ namespace mine {
               into properties.</p>
             
             <p>Algorithms require properties. Mutable algorithms
-              introspect for available properties and handle them.</p>
+              can introspect for available properties and handle them.</p>
           </section>
 
           <section>
@@ -385,8 +396,7 @@ for(auto& v : vertices(polyhedron)) {
 
           <section>
             <h3>Painful to be pretty</h3>
-<pre><code class="cpp">
-BOOST_PARAMETER_FUNCTION(
+<pre><code class="cpp">BOOST_PARAMETER_FUNCTION(
   (void),
   join_vertex,
   tag,
@@ -416,8 +426,8 @@ join_vertex(my_graph);</code></pre>
       progress: true,
       history: true,
 
-      theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
-      transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/none
+      theme: 'beige', // Reveal.getQueryHash().theme, // available themes are in /css/theme
+      transition: 'default', // Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/none
 
       // Optional libraries used to extend on reveal.js
       dependencies: [
