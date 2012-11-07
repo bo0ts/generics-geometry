@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>Generic Programming and Computational Geometry</title>
+    <meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+    <meta name="author" content="Philipp Moeller">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+    <script>
+      document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+    </script>
+
+    <!--[if lt IE 9]>
+	<script src="lib/js/html5shiv.js"></script>
+	<![endif]-->
+  </head>
+
+  <body>
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+        <section>
+          <section>
+          <h2>Who?</h2>
+          <ul>
+            <li>work at GeometryFactory
+            </li>
+            <li>improved interfaces/concepts for surface meshes and polyhedra
+            </li>
+            <li>language lawyer
+            </li>
+            <li>visualization
+            </li>
+          </ul>
+          </section>
+          <section>
+	  <pre><code class="cpp">
+using std::disclaimer;
+	  </code></pre>
+          </section>
+        </section>
+        
+        <section>
+          <h2>Generic Programming</h2>
+          <ul>
+            <li>Alexander Stepanov and David Musser
+            </li>
+            <li>reuse through commonalities in algorithm requirements
+            </li>
+            <li>abstraction without penalty
+            </li>
+            <li>value semantics
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <section>
+          <h2>Concepts</h2>
+          <blockquote cite="http://www.boost.org/community/generic_programming.html">
+            A concept is a set of requirements consisting of valid expressions, 
+            associated types, invariants, and complexity guarantees.
+	  </blockquote>
+          <p style="float: right">David Abrahams, Jeremy Siek</p>
+          </section>
+          
+          <section>
+            <h2>Depending on whom you ask...</h2>
+
+            <ul>
+              <li>interface specifications?
+              </li>
+              <li>consistent models?
+              </li>
+              <li>type-theoretical predicates?
+              </li>
+            </ul>
+          </section>
+          
+          <section>
+            <h2>A Very Short History</h2>
+            <ul>
+              <li>Standard Template Library by Stepanov and Lee at HP
+              </li>
+              <li>STL adopted as part of the ISO C++ library (<b>not</b> std::string)
+              </li>
+              <li>proliferation of concepts and generic programming outside of ISO
+              </li>
+              <li>multiple proposals for inclusion of concepts in C++11
+              </li>
+              <li>compromise proposal added to C++11, later dropped
+              </li>
+              <li>significant revisions and extensions post-C++11
+              </li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Generic Programming with C++</h2>
+            <ul>
+              <li>no language level support</li>
+              <li>library level support is in sight</li>
+              <li>boilerplate (iterator_traits, allocator_traits, pointer_traits, function_traits&hellip;)</li>
+              <li>complicated hackery to get simple features</li>
+              <li>compiler barf</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Methods</h2>
+            <ul>
+              <li>different styles 
+              </li>
+              <li>different requirements
+              </li>
+              <li>personal preferences
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Straight Forward</h2>
+            <pre><code class="cpp">
+concept Stack&lt;typename X&gt; {
+  typename value_type;
+
+  void Stack::push(value_type);
+  void Stack::pop();
+  value_type Stack::top();
+  bool Stack::empty();
+};
+</code></pre>
+
+              <ul class="fragment">
+                <li>intuitive
+                </li>
+                <li>object-y
+                </li>
+                <li>good for ground up work
+                </li>
+                <li>hard to interface non-intrusively
+                </li>
+                <li>no built-ins
+                </li>
+              </ul>
+          </section>
+          <section>
+            <h2>Trivial Types + Traits</h2>
+
+            <ul>
+              <li>use regular types (minus Equality and Swappable) to represent data
+              </li>
+              <li>absolutely all functionality of the algorithm into traits
+              </li>
+            </ul>
+          </section>
+          
+          <section>
+            <h2>Trivial Types + Traits</h2>
+
+            <h3>The Good</h3>
+            <ul>
+              <li>retroactive modeling
+              </li>
+              <li>easy to specify
+              </li>
+              <li>full customization
+              </li>
+            </ul>
+
+            <h3>The Bad</h3>
+            <ul class="fragment">
+              <li>full customization
+              </li>
+              <li>algorithms compose poorly
+              </li>
+              <li>boilerplate heavy (construct_*)
+              </li>
+            </ul>
+
+            <h3>The Ugly</h3>
+            <span class="fragment">favors ad-hoc concepts</span>
+          </section>
+          
+          <section>
+<h2>Free Functions</h2>
+<pre><code class="cpp">concept SinglePassRange&lt;typename X&gt; {
+  typename iterator; // no traits needed
+  typename const_iterator;
+  where SinglePassIterator&lt;iterator&gt;;
+  where SinglePassIterator&lt;const_iterator&gt;;
+
+  iterator begin(X&); // notice free functions
+  iterator end(X&);
+  const_iterator begin(const X&);
+  const_iterator end(const X&);
+};
+
+namespace mine {
+  struct my_vector { 
+    typedef int* iterator; 
+    typedef const int* const_iterator; 
+    int x[20]; 
+  };
+
+  int* begin(my_vector& x) { return x; }
+  int* begin(my_vector& x) { return x + 20; }
+}
+</code></pre>
+          </section>
+          <section>
+            <h2>Free functions</h2>
+            <ul>
+              <li>pinnacle of versatility
+              </li>
+              <li>retroactive modeling
+              </li>
+              <li>ADL is a pain to handle in generic code
+              </li>
+              <li>requires a whole set of advanced features
+              </li>
+            </ul>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Computational Geometry with Generic Programming</h2>
+            <ul>
+              <li>mathematically sound domain &rarr; often not enough
+              </li>
+              <li>concepts need to cover static and dynamic dimensions
+              </li>
+              <li>varying/non-explicit object representations
+              </li>
+              <li>needs to expose most of these qualities for efficient algorithms
+              </li>
+              <li>similar algorithms don't necessarily use similar predicates:
+              where to lift your algorithms to?
+              </li>
+              <li>single functors don't scale well (<code>CGAL::convex_hull_3</code> ~10 Functors)</li>
+            </ul>
+          </section>
+          <section>
+            <h2>Pragmatics</h2>
+            <ul>
+              <li>allow user types/different libraries</li>
+              <li>understandable, simple interfaces</li>
+              <li>customizations</li>
+              <li>be implementable</li>
+              <li>perform reasonable</li>
+            </ul>
+          </section>
+          <section>
+            <h3>Different Solutions: CGAL</h3>
+
+            <ul>
+              <li>heavyweight Kernels
+              </li>
+              <li>CGALTraits for algorithms
+              </li>
+              <li>Kernel adaption
+              </li>
+            </ul>
+          </section>
+          <section>
+            <h3>CGAL continued</h3>
+            <ul>
+              <li>easy manipulation of all predicates/constructions</li>
+              <li></li>
+            </ul>
+          </section>
+          <section>
+            <h3>Different Solutions: Boost.Geometry</h3>
+            <ul>
+              <li>minimalist kernels provide type introspection
+              </li>
+              <li>type adaption through meta-functions
+              </li>
+              <li>strategies encapsulate different implementations
+              </li>
+            </ul>
+          </section>
+          <section>
+            <h3>Boost.Geometry continued</h3>
+            <ul>
+              <li>hard code</li>
+              <li>versatile towards types</li>
+              <li>algorithms not as flexible</li>
+              <li>not helpful for teaching</li>
+            </ul>
+          </section>
+        </section>
+        <section>
+          <section>
+          <h2>Practical: Halfedge Data Structures revisited</h2>
+
+          <ul>
+            <li>very common combinatorial data structure</li>
+            <li>about 3~4 different concepts in CGAL</li>
+          </ul>
+          </section>
+          <section>
+          <h3>Concept Features</h3>
+          <ul>
+            <li>retroactive modeling
+            </li>
+            <li>property map support
+            </li>
+            <li>native graph support
+            </li>
+            <li>partial halfedge data structures
+            </li>
+          </ul>
+          
+          <h3></h3>
+
+          </section>
+          <section>
+            <h3>Models with sugar</h3>
+            <ul>
+              <li>easy static properties
+              </li>
+              <li>dynamic properties
+              </li>
+              <li>full C++11 allocator support
+              </li>
+              <li>be fast and small
+              </li>
+              <li>convenient
+              </li>
+            </ul>
+<pre><code class="cpp">
+template<typename... Options>
+class Surface_mesh;
+
+struct Vertex_properties { Simple_cartesian<double> point; };
+
+Surface_mesh< Vertex_properties<Vertex_properties>, 
+              Dynamic_properties<std::true_type> >
+  polyhedron;
+
+for(auto& v : vertices(polyhedron)) {
+  // ...
+}
+</code></pre>
+          </section>
+        </section>
+      </div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.min.js"></script>
+
+    <script>
+      // Full list of configuration options available here:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+      controls: true,
+      progress: true,
+      history: true,
+
+      theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+      transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/none
+
+      // Optional libraries used to extend on reveal.js
+      dependencies: [
+      { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+      { src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+      { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+      { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+      ]
+      });
+
+    </script>
+  </body>
+</html>

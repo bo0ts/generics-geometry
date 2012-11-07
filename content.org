@@ -1,0 +1,158 @@
+* Who
+  - work at GeometryFactory
+  - improved interfaces/concepts for surface meshes and polyhedra
+  - language lawyer
+  - visualization
+  - using std::disclaimer;
+* Generic Programming
+  - Alexander Stepanov and David Musser
+  - reuse through commonalities in algorithm requirements
+  - abstraction without penalty
+  - value semantics
+* Concepts
+  "A concept is a set of requirements consisting of valid expressions,
+  associated types, invariants, and complexity guarantees."
+    - David Abrahams, Jeremy Siek
+
+  - something different depending on whom you ask
+  - interface specifications?
+  - consistent models?
+  - type-theoretical predicates?
+* A Very Short History of Concepts
+  - Standard Template Library by Stepanov at SGI
+  - STL adopted as the library of ISO C++
+  - proliferation of concepts and generic programming outside of ISO
+  - multiple proposals for inclusion of concepts in C++11
+  - compromise proposal added to C++11, later dropped
+  - significant revisions and extensions post-C++11
+* Generic Programming with C++
+  - (almost) no language level support
+  - library level support is in sight
+  - boilerplate (iterator_traits, allocator_traits, pointer_traits, function_traits...)
+  - complicated hackery to get simple features and work around issues
+  - compiler barf
+* Methods
+  - different styles 
+  - personal preferences
+  - different requirements
+* Straight Forward
+  #+BEGIN_SRC cpp
+  concept Stack<typename X> {
+    typename value_type;
+
+    void Stack::push(value_type);
+    void Stack::pop();
+    value_type Stack::top();
+    bool Stack::empty();
+  };
+  #+END_SRC
+** Why?
+   - intuitive
+   - object-y
+   - good for ground up work
+   - hard to interface non-intrusively
+   - no built-ins
+* Trivial Types + Traits
+  - use regular types (minus Equality and Swappable) to represent data
+  - absolutely all functionality of the algorithm into traits
+  - favors ad-hoc concepts
+** Good
+   - retroactive modeling
+   - easy to write
+   - full customization
+** Bad
+   - full customization
+   - algorithms compose poorly
+   - boilerplate heavy (construct_*)
+* Free functions + ADL
+  #+BEGIN_SRC cpp
+  concept SinglePassRange<typename X> {
+    typename iterator; // no traits needed
+    typename const_iterator;
+    where SinglePassIterator<iterator>;
+    where SinglePassIterator<const_iterator>;
+
+    iterator begin(X&); // notice free functions
+    iterator end(X&);
+    const_iterator begin(const X&);
+    const_iterator end(const X&);
+  };
+
+  namespace mine {
+    struct my_vector { 
+      typedef int* iterator; 
+      int x[20]; 
+    };
+
+    int* begin(my_vector& x) { return x; }
+    int* begin(my_vector& x) { return x + 20; }
+  }
+  #+END_SRC
+** Why?
+   - pinnacle of versatility
+   - retroactive modeling
+   - ADL is a pain to handle in generic code
+   - requires a whole set of advanced features
+* Computational Geometry with Generic Programming
+  - mathematically sound domain -> often not enough
+  - concepts need to cover static and dynamic dimensions
+  - varying/non-explicit object representations
+  - needs to expose most of these qualities for efficient algorithms
+  - similar algorithms don't necessarily use similar predicates:
+    where to lift your algorithms to?
+  - single functors don't scale well (CGAL::convex_hull_3 ~10 Functors)
+** Practical Requirements
+   - have library types
+   - allow user types/different libraries
+   - be understandable
+   - be implementable
+** Different Solutions: CGAL
+   - heavyweight Kernels
+   - CGALTraits for algorithms
+   - Kernel adaption
+** CGAL continued
+   - "easy" manipulation of all predicates/constructions
+   - 
+** Different Solutions: Boost.Geometry
+   - minimalist kernels provide type introspection
+   - type adaption through meta-functions
+   - strategies encapsulate different implementations
+** Boost.Geometry continued
+   - "interesting" code
+   - versatile towards types
+   - algorithms not as flexible
+   - not helpful for teaching
+
+* Practical: Halfedge Data Structures revisited
+  - very common combinatorial data structure 
+  - about 3~4 different concepts in CGAL
+
+  Concepts should offer:
+  - retroactive modeling
+  - property map support
+  - native graph support
+  - partial halfedge data structures
+
+  Models should offer:
+  - easy static properties
+  - dynamic properties
+  - full C++11 allocator support
+  - be fast and small
+  - maybe convenient
+** An API on top of the Boost Graph Library
+   
+** Models with Sugar
+   #+BEGIN_SRC cpp
+   template<typename... Options>
+   class Surface_mesh;
+
+   struct Vertex_properties { Simple_cartesian<double> point; };
+
+   Surface_mesh< Vertex_properties<Vertex_properties>, 
+                 Dynamic_properties<std::true_type> >
+     polyhedron;
+
+   for(auto& v : vertices(polyhedron)) {
+     // ...
+   }
+   #+END_SRC
