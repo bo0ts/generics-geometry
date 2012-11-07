@@ -16,7 +16,6 @@
     <!-- For syntax highlighting -->
     <link rel="stylesheet" href="lib/css/zenburn.css">
 
-    <!-- If the query includes 'print-pdf', use the PDF print sheet -->
     <script>
       document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
     </script>
@@ -28,9 +27,17 @@
 
   <body>
     <div class="reveal">
-
-      <!-- Any section element inside of this container is displayed as a slide -->
       <div class="slides">
+	<section>
+	  <h2>Software Engineering using Generic Programming and Computational Geometry</h2>
+	  <p>
+	    <small>Philipp Möller</small>
+	  </p>
+          <img src="http://stackoverflow.com/users/flair/105672.png?theme=dark" width="208" height="58" alt="profile for pmr at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for pmr at Stack Overflow, Q&amp;A for professional and enthusiast programmers">
+          <a href="http://stackoverflow.com/users/105672/pmr">
+          </a>
+	</section>
+
         <section>
           <section>
           <h2>Who?</h2>
@@ -53,19 +60,33 @@ using std::disclaimer;
         </section>
         
         <section>
-          <h2>Generic Programming</h2>
-          <ul>
-            <li>Alexander Stepanov and David Musser
-            </li>
-            <li>reuse through commonalities in algorithm requirements
-            </li>
-            <li>abstraction without penalty
-            </li>
-            <li>value semantics
-            </li>
-          </ul>
+          <section>
+            <h2>Generic Programming</h2>
+            <ul>
+              <li>created Alexander Stepanov and David Musser</li>
+              <li>reuse through commonalities in algorithm requirements</li>
+              <li>abstraction without penalty</li>
+              <li>value semantics</li>
+              <li>use common syntax to reuse</li>
+            </ul>
+          </section>
+          
+          <section>
+            <h3>Lifting</h3>
+            <p>
+              Continuously raise the level of abstraction over input parameters.
+            </p>
+            
+            <p>
+              Group those abstractions into Concepts.
+            </p>
+            
+            <p>
+              Use concept refinement and hierarchies of concepts to expose implementation differences.
+            </p>
+          </section>
         </section>
-
+        
         <section>
           <section>
           <h2>Concepts</h2>
@@ -73,6 +94,7 @@ using std::disclaimer;
             A concept is a set of requirements consisting of valid expressions, 
             associated types, invariants, and complexity guarantees.
 	  </blockquote>
+
           <p style="float: right">David Abrahams, Jeremy Siek</p>
           </section>
           
@@ -80,12 +102,9 @@ using std::disclaimer;
             <h2>Depending on whom you ask...</h2>
 
             <ul>
-              <li>interface specifications?
-              </li>
-              <li>consistent models?
-              </li>
-              <li>type-theoretical predicates?
-              </li>
+              <li>interface specifications?</li>
+              <li>consistent models?</li>
+              <li>type-theoretical predicates?</li>
             </ul>
           </section>
           
@@ -112,7 +131,7 @@ using std::disclaimer;
           <section>
             <h2>Generic Programming with C++</h2>
             <ul>
-              <li>no language level support</li>
+              <li>no direct language level support</li>
               <li>library level support is in sight</li>
               <li>boilerplate (iterator_traits, allocator_traits, pointer_traits, function_traits&hellip;)</li>
               <li>complicated hackery to get simple features</li>
@@ -123,12 +142,9 @@ using std::disclaimer;
           <section>
             <h2>Methods</h2>
             <ul>
-              <li>different styles 
-              </li>
-              <li>different requirements
-              </li>
-              <li>personal preferences
-              </li>
+              <li>different styles</li>
+              <li>different requirements</li>
+              <li>personal preferences</li>
             </ul>
           </section>
 
@@ -225,14 +241,10 @@ namespace mine {
           <section>
             <h2>Free functions</h2>
             <ul>
-              <li>pinnacle of versatility
-              </li>
-              <li>retroactive modeling
-              </li>
-              <li>ADL is a pain to handle in generic code
-              </li>
-              <li>requires a whole set of advanced features
-              </li>
+              <li>pinnacle of versatility</li>
+              <li>retroactive modelin</li>
+              <li>ADL is a pain to handle in generic code</li>
+              <li>requires advanced language features</li>
             </ul>
           </section>
         </section>
@@ -241,58 +253,61 @@ namespace mine {
           <section>
             <h2>Computational Geometry with Generic Programming</h2>
             <ul>
-              <li>mathematically sound domain &rarr; often not enough
-              </li>
-              <li>concepts need to cover static and dynamic dimensions
-              </li>
-              <li>varying/non-explicit object representations
-              </li>
-              <li>needs to expose most of these qualities for efficient algorithms
-              </li>
-              <li>similar algorithms don't necessarily use similar predicates:
-              where to lift your algorithms to?
-              </li>
-              <li>single functors don't scale well (<code>CGAL::convex_hull_3</code> ~10 Functors)</li>
+              <li>mathematically sound domain &rarr; often not enough</li>
+              <li>cover multiple dimensions (static and dynamic)</li>
+              <li>varying/non-explicit object representations</li>
+              <li>different geometries</li>
+              <li>allow for exactness</li>
+              <li>needs to expose most of these qualities for efficient algorithms</li>
             </ul>
           </section>
+
           <section>
             <h2>Pragmatics</h2>
             <ul>
               <li>allow user types/different libraries</li>
-              <li>understandable, simple interfaces</li>
+              <li>understandable, usable interfaces</li>
               <li>customizations</li>
               <li>be implementable</li>
               <li>perform reasonable</li>
+              <li>support number types</li>
             </ul>
           </section>
+
+          <section>
+            <blockquote cite="http://www.generic-programming.org">
+              A study of graph algorithms will produce Graph concepts
+              that describe the behavior of graphs, whereas a study of
+              linear algebra algorithms will produce Matrix and Vector
+              concepts.
+	    </blockquote>
+
+            Similar algorithms don not necessarily use similar predicates:
+            where to lift your algorithms to?
+          </section>
+          
           <section>
             <h3>Different Solutions: CGAL</h3>
 
             <ul>
-              <li>heavyweight Kernels
-              </li>
-              <li>CGALTraits for algorithms
-              </li>
-              <li>Kernel adaption
-              </li>
+              <li>heavyweight Kernels</li>
+              <li>CGALTraits for algorithms</li>
+              <li>Kernel adaption</li>
             </ul>
           </section>
           <section>
             <h3>CGAL continued</h3>
             <ul>
-              <li>easy manipulation of all predicates/constructions</li>
-              <li></li>
+              <li>kernels allow manipulation of the whole algorithm</li>
+              <li>kernels extensible by refinement</li>
             </ul>
           </section>
           <section>
             <h3>Different Solutions: Boost.Geometry</h3>
             <ul>
-              <li>minimalist kernels provide type introspection
-              </li>
-              <li>type adaption through meta-functions
-              </li>
-              <li>strategies encapsulate different implementations
-              </li>
+              <li>minimalist kernels provide type introspection</li>
+              <li>type adaption through meta-functions</li>
+              <li>strategies encapsulate different implementations</li>
             </ul>
           </section>
           <section>
@@ -301,63 +316,90 @@ namespace mine {
               <li>hard code</li>
               <li>versatile towards types</li>
               <li>algorithms not as flexible</li>
-              <li>not helpful for teaching</li>
             </ul>
           </section>
         </section>
         <section>
           <section>
-          <h2>Practical: Halfedge Data Structures revisited</h2>
+            <h2>Practical: Halfedge Data Structures revisited</h2>
 
-          <ul>
-            <li>very common combinatorial data structure</li>
-            <li>about 3~4 different concepts in CGAL</li>
-          </ul>
+            <ul>
+              <li>very common combinatorial data structure</li>
+              <li>about 3~4 different concepts in CGAL</li>
+            </ul>
           </section>
           <section>
-          <h3>Concept Features</h3>
-          <ul>
-            <li>retroactive modeling
-            </li>
-            <li>property map support
-            </li>
-            <li>native graph support
-            </li>
-            <li>partial halfedge data structures
-            </li>
-          </ul>
-          
-          <h3></h3>
-
+            <h3>Concept Features</h3>
+            <ul>
+              <li>retroactive modeling</li>
+              <li>property map support</li>
+              <li>native graph support</li>
+              <li>partial halfedge data structures</li>
+            </ul>
           </section>
+
+          <section>
+            <h3>Concepts and Adapters</h3>
+
+            <p>Not all algorithms require full Halfedge Data
+              Structures. Provide views on types:</p>
+
+            <ul>
+              <li>Bidirectional</li>
+              <li>Directed</li>
+            </ul>
+
+            <h3>Features as Properties</h3>
+            <p>Abstract optional features of Halfedge Data Structures
+              into properties.</p>
+            
+            <p>Algorithms require properties. Mutable algorithms
+              introspect for available properties and handle them.</p>
+          </section>
+
           <section>
             <h3>Models with sugar</h3>
             <ul>
-              <li>easy static properties
-              </li>
-              <li>dynamic properties
-              </li>
-              <li>full C++11 allocator support
-              </li>
-              <li>be fast and small
-              </li>
-              <li>convenient
-              </li>
+              <li>easy static properties</li>
+              <li>dynamic properties</li>
+              <li>full C++11 allocator support</li>
+              <li>be fast and small</li>
+              <li>convenient</li>
             </ul>
-<pre><code class="cpp">
-template<typename... Options>
+<pre><code class="cpp">template&lt;typename... Options&gt;
 class Surface_mesh;
 
-struct Vertex_properties { Simple_cartesian<double> point; };
+struct Vertex_properties {
+  Simple_cartesian&lt;double&gt;::Point_3 point;
+};
 
-Surface_mesh< Vertex_properties<Vertex_properties>, 
-              Dynamic_properties<std::true_type> >
+Surface_mesh&lt; Vertex_properties&lt;Vertex_properties&gt;
+            , Dynamic_properties&lt;std::true_type&gt;&gt;
   polyhedron;
 
 for(auto& v : vertices(polyhedron)) {
   // ...
 }
 </code></pre>
+          </section>
+
+          <section>
+            <h3>Painful to be pretty</h3>
+<pre><code class="cpp">
+BOOST_PARAMETER_FUNCTION(
+  (void),
+  join_vertex,
+  tag,
+  (required (graph, *) )
+  (required (edge, *) )
+  (optional
+   (next_map,  *, boost::get(boost::edge_next, graph))
+   (prev_map,  *, boost::get(boost::edge_prev, graph))
+    )
+)
+{ my_join_vertex_impl(graph, edge, next_map, prev_map); }
+
+join_vertex(my_graph);</code></pre>
           </section>
         </section>
       </div>
